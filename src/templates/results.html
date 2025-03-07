@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vorhersagen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            width: 80%;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            text-align: center;
+        }
+        .image-container img {
+            max-width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+
+        h2, h3 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .prediction {
+            font-size: 22px;
+            font-weight: bold;
+            color: #007BFF;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .probabilities {
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+        }
+        .probabilities p {
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;
+        }
+        .probabilities p:nth-child(1) { background-color: #004085; color: white; }
+        .probabilities p:nth-child(2) { background-color: #0056b3; color: white; }
+        .probabilities p:nth-child(3) { background-color: #007bff; color: white; }
+        .probabilities p:nth-child(4) { background-color: #66b3ff; }
+        .probabilities p:nth-child(5) { background-color: #b3d9ff; }
+        .probabilities p:nth-child(6) { background-color: #e6f2ff; }
+        .back-btn {
+            background: #007BFF;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            margin-top: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .back-btn:hover {
+            background: #0056b3;
+        }
+
+
+        .filter-section {
+            width: 80%;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .filter-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filter-input {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 200px;
+        }
+        .filter-dropdown {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>Vorhersagen</h2>
+    <div class="filter-section">
+        <p>Filtere die Ergebnisse nach SOC-Klasse oder Wahrscheinlichkeit:</p>
+        <div class="filter-container">
+            <input type="text" class="filter-input" id="searchBox" placeholder="SOC-Klasse
+suchen...">
+            <select class="filter-dropdown" id="sortFilter" onchange="applySorting()">
+                <option value="prob-desc">Nach Wahrscheinlichkeit in % (absteigend)</option>
+                <option value="prob-asc">Nach Wahrscheinlichkeit in % (aufsteigend)</option>
+                <option value="alpha">Nach SOC-Nummer</option>
+            </select>
+        </div>
+    </div>
+    <div class="container" id="resultsContainer">
+        {% for result in results %}
+            <div class="card">
+                <div class="image-container">
+                    <h3>{{ result.image }}</h3>
+
+
+                    <img src="{{ result.image_url }}" alt="Hochgeladenes Bild">
+                </div>
+                <div class="info-container">
+                    <h3>Vermutete Hauptklasse:</h3>
+                    <p class="prediction">{{ result.main_class }}</p>
+                    <div class="probabilities">
+                        <h3>Top-5 Vorhersagen:</h3>
+                        {% for class, prob in result.top_5_predictions %}
+                            <p class="prob-item" data-prob="{{ prob }}">{{ class }}: {{ "%.2f"|format(prob *
+100) }}%</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <button onclick="window.location.href='/'" class="back-btn">Zurück</button>
+
+
+
+    <script>
+        document.getElementById("searchBox").addEventListener("input", function() {
+            let filter = this.value.toLowerCase();
+            let cards = document.querySelectorAll(".card");
+
+
+
+            cards.forEach(card => {
+                let mainClass = card.querySelector(".prediction").innerText.toLowerCase();
+                if (mainClass.includes(filter)) {
+                    card.style.display = "flex";
+                } else {
+                    card.style.display = "none";
+                }
+            });
+        });
+
+
+
+        function applySorting() {
+            let sortType = document.getElementById("sortFilter").value;
+            let container = document.getElementById("resultsContainer");
+            let cards = Array.from(container.getElementsByClassName("card"));
+
+
+
+            cards.sort((a, b) => {
+                let aProb = parseFloat(a.querySelector(".probabilities .prob-item").getAttribute("data-
+prob"));
+                let bProb = parseFloat(b.querySelector(".probabilities .prob-item").getAttribute("data-
+prob"));
+                let aClass = a.querySelector(".prediction").innerText.toLowerCase();
+                let bClass = b.querySelector(".prediction").innerText.toLowerCase();
+
+
+
+                if (sortType === "prob-desc") return bProb - aProb;
+                if (sortType === "prob-asc") return aProb - bProb;
+
+
+                if (sortType === "alpha") return aClass.localeCompare(bClass);
+            });
+
+
+
+            container.innerHTML = "";
+            cards.forEach(card => container.appendChild(card));
+        }
+    </script>
+</body>
+</html>

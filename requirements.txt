@@ -1,0 +1,43 @@
+# TensorFlow für das Training
+tensorflow
+
+# Keras ist oft in neueren TensorFlow-Versionen enthalten, aber separat hier für Kompatibilität
+keras
+
+# Numerische Berechnungen
+numpy
+
+# Datenverarbeitung (Excel, CSV, DataFrames)
+pandas
+
+# Klassifikationsreport, Confusion-Matrix, t-SNE, etc.
+scikit-learn
+
+# Hyperparameter-Optimierung
+hyperopt
+
+# Visualisierungen
+matplotlib
+seaborn
+
+# Feature-Extraktion (Haralick)
+mahotas
+
+# Fortschrittsbalken
+tqdm
+
+# Bildverarbeitung (HOG, Gabor etc.)
+scikit-image
+opencv-python
+
+# Excel-Dateien (wenn du .xlsx verarbeitest)
+openpyxl
+
+# Flask für die Web-App
+flask
+
+# Pillow (PIL) für Bildverarbeitung
+pillow
+
+# YAML, falls du eine config.yaml nutzt
+pyyaml

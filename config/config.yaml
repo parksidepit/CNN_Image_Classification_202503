@@ -1,0 +1,22 @@
+data:
+  excel_path: data/Sealings_workspace.xlsx
+  source_folder: data/rti_results_export_neu
+  sorted_folder: data/processed
+  base_dir: data/processed
+  splits:
+    train: data/splits/train
+    val: data/splits/val
+    test: data/splits/test
+
+
+training:
+  image_size: [224, 224]
+  batch_size: 16
+  epochs: 15
+  learning_rate: 5e-5
+  dropout: 0.4
+  dense_units: 512
+  output_dir: models
+
+evaluation:
+  output_dir: reports
