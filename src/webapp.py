@@ -1,18 +1,13 @@
 """
 webapp.py
 
-This module implements a Flask web application for image classification using a trained model.
-It loads the trained model from the models folder and provides an interface to upload an image,
-which is then classified. The predictions (top 5) are displayed along with the uploaded image.
-
-Folder structure assumptions:
-- The project root contains a "models" folder with your trained model.
-- The "src/templates" folder contains HTML templates (e.g., "upload.html" and "results.html").
-- The "src/uploads" folder will store uploaded images, and "src/classified_results" will store copies of images classified by the predicted class.
+This module implements a Flask web application for image classification using a trained EfficientNet model.
+It supports both single-file and folder uploads. Uploaded images are saved to the "data/uploads" folder,
+and a copy is stored in "data/classified_results" under the predicted class.
+This ensures that these generated files are not tracked by Git.
 """
 
 import os
-import json
 import shutil
 import numpy as np
 import tensorflow as tf
@@ -23,7 +18,6 @@ from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.efficientnet import preprocess_input
 import yaml
 
-
 def get_project_root():
     """
     Returns the absolute path to the project root directory.
@@ -31,17 +25,15 @@ def get_project_root():
     current_dir = os.path.dirname(os.path.realpath(__file__))
     return os.path.abspath(os.path.join(current_dir, '..'))
 
-
 def load_config():
     """
-    Loads configuration settings from a YAML file located in the 'config' folder at the project root.
+    Loads configuration settings from a YAML file in the 'config' folder at the project root.
     """
     project_root = get_project_root()
     config_path = os.path.join(project_root, 'config', 'config.yaml')
     with open(config_path, "r") as file:
         config = yaml.safe_load(file)
     return config
-
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -50,19 +42,19 @@ app = Flask(__name__)
 config = load_config()
 project_root = get_project_root()
 
-# Use the model filename "optimized_efficientnet.keras"
-model_filename = "optimized_efficientnet.keras"
+# Use model filename as specified in the config (or default) – here we use the good model from the PDF.
+model_filename = config['training'].get('model_filename', "optimized_efficientnet.keras")
 model_path = os.path.join(project_root, config['training'].get('output_dir', 'models'), model_filename)
 model = load_model(model_path)
 
-# Set upload and result directories (inside src folder)
-UPLOAD_FOLDER = os.path.join(project_root, "src", "uploads")
-RESULT_FOLDER = os.path.join(project_root, "src", "classified_results")
+# Define upload and classified results directories (in the data folder, so they are ignored by Git)
+UPLOAD_FOLDER = os.path.join(project_root, "data", "uploads")
+RESULT_FOLDER = os.path.join(project_root, "data", "classified_results")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(RESULT_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# CLASS_LABELS ordered as in your PDF (29 classes)
+# CLASS_LABELS ordered as in the PDF (29 classes)
 CLASS_LABELS = {
     0: 'SOC1',
     1: 'SOC11',
@@ -95,7 +87,6 @@ CLASS_LABELS = {
     28: 'SOC8'
 }
 
-
 def predict_image(img_path):
     """
     Loads an image, preprocesses it, and predicts its class using the loaded model.
@@ -115,35 +106,49 @@ def predict_image(img_path):
     top_predictions = [(CLASS_LABELS[i], float(predictions[i])) for i in top_indices]
     return top_predictions
 
-
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
+    """
+    Serves the uploaded file from the UPLOAD_FOLDER.
+    """
     return send_from_directory(UPLOAD_FOLDER, filename)
 
-
 @app.route("/", methods=["GET", "POST"])
-def upload_file():
+def upload_file_route():
     if request.method == "POST":
-        if "file" in request.files:
-            file = request.files["file"]
-            if file.filename == "":
-                return render_template("upload.html", message="No file selected.")
+        # Get list of files (supports both single file and multiple file uploads)
+        files = request.files.getlist("file")
+        if not files or files[0].filename == "":
+            return render_template("upload.html", message="No file selected.")
+
+        results = []
+        for file in files:
             filename = secure_filename(file.filename)
             file_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(file_path)
 
-            # Get predictions for the uploaded image
             predictions = predict_image(file_path)
-            main_prediction = predictions[0][0]  # Top prediction
+            print("Predictions for", filename, ":", predictions)
+            main_prediction = predictions[0][0]  # Top predicted class
 
-            # Optionally, copy the file into a folder corresponding to the predicted class
+            # Copy the file into a folder corresponding to the predicted class in RESULT_FOLDER
             class_folder = os.path.join(RESULT_FOLDER, main_prediction)
             os.makedirs(class_folder, exist_ok=True)
             shutil.copy(file_path, os.path.join(class_folder, filename))
 
-            return render_template("results.html", predictions=predictions, image_url=f"/uploads/{filename}")
-    return render_template("upload.html")
+            result = {
+                "image": filename,
+                "image_url": f"/uploads/{filename}",
+                "main_class": main_prediction,
+                "top_5_predictions": predictions
+            }
+            results.append(result)
 
+        if results:
+            return render_template("results.html", results=results)
+        else:
+            return render_template("upload.html", message="No valid files found.")
+    return render_template("upload.html")
 
 if __name__ == "__main__":
     app.run(debug=True, threaded=True)
