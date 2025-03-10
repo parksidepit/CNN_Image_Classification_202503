@@ -57,30 +57,41 @@ The project follows a modular structure:
 
 ```
 CNN_Image_Classification_202503/
+├── .venv/                      # Local Python virtual environment (ignored by .gitignore)
+├── build/                      # Sphinx/LaTeX build outputs (ignored by .gitignore)
 ├── config/
-│   └── config.yaml         # Configuration file with paths and parameters
-├── data/
-│   ├── Sealings_workspace.xlsx   # Excel file with metadata (not pushed; see .gitignore)
-│   ├── rti_results_export_neu/    # Original image folders (with "_a" folders)
-│   ├── processed/           # Sorted images after Excel processing (SOC folders)
-│   └── splits/              # Train/Val/Test splits created from the processed folder
-│       ├── train/
-│       ├── val/
-│       └── test/
-├── models/                  # Folder for saving trained models
-├── reports/                 # Folder for evaluation outputs (e.g., reports, plots)
+│   └── config.yaml             # Central configuration file for paths, hyperparameters, etc.
+├── data/                       # Main data folder; raw data is generally ignored
+│   ├── classified_results/     # Images classified by the web app (grouped by predicted class)
+│   ├── processed/              # SOC-based folders after Excel processing
+│   ├── rti_results_export_neu/ # Original image subfolders ending with "_a" (ignored)
+│   ├── splits/                 # Train/Val/Test directories created from processed data
+│   │   ├── train/
+│   │   ├── val/
+│   │   └── test/
+│   ├── uploads/                # Uploaded images via the web app (ignored if large)
+│   ├── background.jpg          # Background image for the web interface
+│   └── Sealings_workspace.xlsx # Excel file with metadata (ignored if large/private)
+├── models/                     # Trained model (by default *not* ignored in .gitignore)
+├── reports/                    # Evaluation outputs (plots, CSV, logs); can contain large files
+├── source/                     # Sphinx source folder (ignored by .gitignore if desired)
 ├── src/
-│   ├── __init__.py
-│   ├── data_preparation.py       # Data preparation module
-│   ├── train.py                  # Training module (EfficientNet with last 70 layers unfrozen)
-│   ├── evaluate.py               # Evaluation module
-│   ├── duplicate_checker.py      # Duplicate checker module
-│   ├── webapp.py                 # Flask web application for inference
-│   ├── uploads/                  # Folder for uploaded images (managed by webapp)
-│   └── classified_results/       # Folder for saving images classified by predicted class
-├── .gitignore               # Git ignore file
-├── README.md                # This documentation file
-└── requirements.txt         # Python dependencies
+│   ├── data/
+│   │   # (Optional) Additional data-related modules
+│   ├── templates/             # HTML templates (upload.html, results.html) for the Flask web app
+│   ├── __init__.py            # Empty file to recognize src/ as a Python package
+│   ├── data_preparation.py    # Excel-based processing, augmentation, Train/Val/Test splitting
+│   ├── duplicate_checker.py   # Detects duplicates in test vs. train/val and moves them
+│   ├── evaluate.py            # Loads trained model, evaluates (ROC, confusion matrix, etc.)
+│   ├── train.py               # Trains an EfficientNetB0 (last 70 layers unfrozen)
+│   ├── train_multiple_backbones.py
+│   │   # Compares multiple CNN backbones (VGG, ResNet, EfficientNet) using Hyperopt
+│   └── webapp.py              # Flask-based upload and classification web application
+├── .gitattributes              # Git attributes (e.g., text/binary settings)
+├── .gitignore                  # Lists files/folders to ignore (e.g., .venv, data/, build/)
+├── README.md                   # Main project documentation/overview
+└── requirements.txt            # Python dependencies (TensorFlow, Flask, etc.)
+
 ```
 
 ## Setup and Installation
@@ -159,6 +170,24 @@ evaluation:
   ```bash
   python src/data_preparation.py
   ```
+  
+### Duplicate Checker
+
+- **File:** `src/duplicate_checker.py`
+- **Functionality:**
+    - Computes image hashes for images in train and validation sets.
+    - Checks the test set for duplicates and moves any duplicates to a designated duplicates folder.
+- **Usage:**
+  ```bash
+  python src/duplicate_checker.py
+  ```
+
+### Training Multiple Backbones  
+- **File:** `src/train_multiple_backbones.py`
+- **Functionality:**
+    - Compares different CNN backbones (e.g., VGG16, ResNet50, EfficientNetB0) on the same dataset.
+    - Uses Hyperopt for hyperparameter tuning (learning rate, dropout, etc.).
+    - Saves model weights and evaluation results for each backbone.
 
 ### Training
 
@@ -187,17 +216,6 @@ evaluation:
   python src/evaluate.py
   ```
 
-### Duplicate Checker
-
-- **File:** `src/duplicate_checker.py`
-- **Functionality:**
-    - Computes image hashes for images in train and validation sets.
-    - Checks the test set for duplicates and moves any duplicates to a designated duplicates folder.
-- **Usage:**
-  ```bash
-  python src/duplicate_checker.py
-  ```
-
 ### Web Application
 
 - **File:** `src/webapp.py`
@@ -214,6 +232,11 @@ evaluation:
   http://127.0.0.1:5000
   ```
 
+
+- **Usage:**
+  ```bash
+  python src/train_multiple_backbones.py
+  ```
 ## Usage
 
 1. **Prepare Data:**  
@@ -249,8 +272,6 @@ evaluation:
 - **Hybrid Approach and Feature Extraction:**  
   Future updates may include additional modules for hybrid CNN approaches with feature extraction and t-SNE
   visualization.
-- **Training with Multiple Backbones:**  
-  A script for training multiple backbones (e.g., train_multiple_backbones.py) is planned for further comparison.
 - **Hyperparameter Tuning:**  
   More advanced tuning methods may be applied to improve model performance.
 
