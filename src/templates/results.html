@@ -5,215 +5,413 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vorhersagen</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link
-href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
-rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Roboto', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f4f4f4;
-            color: #333;
             margin: 0;
-            padding: 20px;
-        }
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            width: 80%;
-        }
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 500px;
+            padding: 0;
+            color: #212121;
+            background: url("/data/background.jpg") center center fixed no-repeat;
+            background-size: cover;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            text-align: center;
-        }
-        .image-container img {
-            max-width: 100%;
-            max-height: 250px;
-            object-fit: contain;
-            border-radius: 8px;
         }
 
+        /* Fixed header section */
+        .header-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
 
-        h2, h3 {
-            color: #333;
-            margin-bottom: 8px;
-        }
-        .prediction {
-            font-size: 22px;
-            font-weight: bold;
-            color: #007BFF;
-            text-align: center;
-            margin-bottom: 15px;
-        }
-        .probabilities {
-            padding: 10px;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            width: 100%;
-        }
-        .probabilities p {
-            padding: 10px;
-            border-radius: 6px;
-            font-weight: bold;
-            text-align: center;
-            margin: 0;
-        }
-        .probabilities p:nth-child(1) { background-color: #004085; color: white; }
-        .probabilities p:nth-child(2) { background-color: #0056b3; color: white; }
-        .probabilities p:nth-child(3) { background-color: #007bff; color: white; }
-        .probabilities p:nth-child(4) { background-color: #66b3ff; }
-        .probabilities p:nth-child(5) { background-color: #b3d9ff; }
-        .probabilities p:nth-child(6) { background-color: #e6f2ff; }
-        .back-btn {
-            background: #007BFF;
+        /* App bar styling with transparency */
+        .app-bar {
+            height: 64px;
+            background-color: rgba(25, 118, 210, 0.9);
             color: white;
-            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .app-bar h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 500;
+            flex-grow: 1;
+        }
+
+        /* Back button styling */
+        .back-icon-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
             border: none;
-            border-radius: 6px;
-            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
             cursor: pointer;
-            font-size: 16px;
-            text-transform: uppercase;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .back-btn:hover {
-            background: #0056b3;
+            transition: background-color 0.3s ease;
         }
 
-
-        .filter-section {
-            width: 80%;
-            margin: 20px 0;
-            text-align: center;
+        .back-icon-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
         }
+
+        .material-icons {
+            color: white;
+            font-size: 24px;
+        }
+
+        /* Filter panel styling - now attached to header */
+        .filter-panel {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 16px 24px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),
+                        0 3px 1px -2px rgba(0,0,0,0.12),
+                        0 1px 5px 0 rgba(0,0,0,0.2);
+        }
+
         .filter-container {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
             flex-wrap: wrap;
+            gap: 16px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        .filter-input {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 200px;
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
+        .filter-label {
+            margin: 0;
+            font-size: 14px;
+            color: #757575;
+            white-space: nowrap;
+        }
+
+        .filter-input,
         .filter-dropdown {
-            padding: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #BDBDBD;
+            outline: none;
+            min-width: 200px;
+            transition: border 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .filter-input:focus,
+        .filter-dropdown:focus {
+            border-color: #1976D2;
+            box-shadow: 0 0 0 1px rgba(25,118,210,0.2);
+        }
+
+        /* Masonry layout for the result cards */
+        .masonry-grid {
+            column-count: 3;
+            column-gap: 16px;
+            max-width: 1200px;
+            margin: 140px auto 40px auto; /* Increased top margin to account for header+filter */
+            padding: 16px;
+        }
+
+        /* Result cards with Material Design elevation */
+        .result-card {
+            display: inline-block;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),
+                        0 3px 1px -2px rgba(0,0,0,0.12),
+                        0 1px 5px 0 rgba(0,0,0,0.2);
+            width: 300px;
+            margin: 0 0 16px;
+            vertical-align: top;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .result-card:hover {
+            box-shadow: 0 8px 10px 1px rgba(0,0,0,0.14),
+                        0 3px 14px 2px rgba(0,0,0,0.12),
+                        0 5px 5px -3px rgba(0,0,0,0.2);
+        }
+
+        .result-card-content {
+            padding: 16px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .filename {
+            font-size: 13px;
+            color: #757575;
+            margin-bottom: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .image-container {
+            background-color: #f5f5f5;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .divider {
+            margin: 16px 0;
+            border: none;
+            height: 1px;
+            background-color: #EEEEEE;
+        }
+
+        .main-class-heading {
+            margin: 8px 0;
             font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            background: white;
-            cursor: pointer;
+            font-weight: 500;
+            color: #424242;
+        }
+
+        .prediction {
+            font-size: 24px;
+            font-weight: 500;
+            color: #1976D2;
+            margin: 8px 0 16px 0;
+        }
+
+        .probabilities {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .probabilities h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: #424242;
+        }
+
+        .prob-item {
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 500;
+            margin: 0;
+            text-align: center;
+            color: #fff;
+            transition: transform 0.2s ease;
+        }
+
+        .prob-item:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Material Design blue palette for probability items */
+        .prob-item:nth-child(1) { background-color: #0D47A1; }
+        .prob-item:nth-child(2) { background-color: #1565C0; }
+        .prob-item:nth-child(3) { background-color: #1976D2; }
+        .prob-item:nth-child(4) { background-color: #1E88E5; }
+        .prob-item:nth-child(5) { background-color: #2196F3; }
+
+        /* Footer styling - similar to upload.html with reduced height and transparency */
+        .footer {
+            background-color: rgba(255, 255, 255, 0.9);
+            width: 100%;
+            padding: 16px;
+            margin-top: auto;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .disclaimer {
+            font-size: 11px;
+            color: #757575;
+            line-height: 1.4;
+        }
+
+        .disclaimer p {
+            margin: 4px 0;
+            color: #757575;
+        }
+
+        .disclaimer a {
+            color: #1976D2;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .disclaimer a:hover {
+            color: #0D47A1;
+            text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1000px) {
+            .masonry-grid {
+                column-count: 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .filter-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .filter-input,
+            .filter-dropdown {
+                flex-grow: 1;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .masonry-grid {
+                column-count: 1;
+                margin-top: 180px; /* Increased for smaller screens */
+            }
         }
     </style>
 </head>
 <body>
-    <h2>Vorhersagen</h2>
-    <div class="filter-section">
-        <p>Filtere die Ergebnisse nach SOC-Klasse oder Wahrscheinlichkeit:</p>
+<!-- Fixed header with filter panel -->
+<div class="header-container">
+    <!-- Material Design App Bar -->
+    <div class="app-bar">
+        <button onclick="window.location.href='/'" class="back-icon-btn">
+            <span class="material-icons">arrow_back</span>
+        </button>
+        <h1>Ergebnisse der Bildklassifikation</h1>
+    </div>
+
+    <!-- Filter Panel attached to header -->
+    <div class="filter-panel">
         <div class="filter-container">
-            <input type="text" class="filter-input" id="searchBox" placeholder="SOC-Klasse
-suchen...">
-            <select class="filter-dropdown" id="sortFilter" onchange="applySorting()">
-                <option value="prob-desc">Nach Wahrscheinlichkeit in % (absteigend)</option>
-                <option value="prob-asc">Nach Wahrscheinlichkeit in % (aufsteigend)</option>
-                <option value="alpha">Nach SOC-Nummer</option>
-            </select>
+            <div class="filter-group">
+                <p class="filter-label">Suche nach Klasse:</p>
+                <input type="text" class="filter-input" id="searchBox" placeholder="Klassenname eingeben...">
+            </div>
+            <div class="filter-group">
+                <p class="filter-label">Sortieren nach:</p>
+                <select class="filter-dropdown" id="sortFilter" onchange="applySorting()">
+                    <option value="prob-desc">Wahrscheinlichkeit (höchste zuerst)</option>
+                    <option value="prob-asc">Wahrscheinlichkeit (niedrigste zuerst)</option>
+                    <option value="alpha">Alphabetisch (Klassen)</option>
+                </select>
+            </div>
         </div>
     </div>
-    <div class="container" id="resultsContainer">
-        {% for result in results %}
-            <div class="card">
-                <div class="image-container">
-                    <h3>{{ result.image }}</h3>
+</div>
 
-
-                    <img src="{{ result.image_url }}" alt="Hochgeladenes Bild">
-                </div>
-                <div class="info-container">
-                    <h3>Vermutete Hauptklasse:</h3>
-                    <p class="prediction">{{ result.main_class }}</p>
-                    <div class="probabilities">
-                        <h3>Top-5 Vorhersagen:</h3>
-                        {% for class, prob in result.top_5_predictions %}
-                            <p class="prob-item" data-prob="{{ prob }}">{{ class }}: {{ "%.2f"|format(prob *
-100) }}%</p>
-                        {% endfor %}
-                    </div>
-                </div>
+<!-- Masonry Grid for result cards -->
+<div class="masonry-grid" id="resultsContainer">
+    {% for result in results %}
+    <div class="result-card">
+        <div class="result-card-content">
+            <p class="filename">{{ result.image }}</p>
+            <div class="image-container">
+                <img src="{{ result.image_url }}" alt="{{ result.image }}">
             </div>
-        {% endfor %}
+            <hr class="divider">
+            <h3 class="main-class-heading">Vermutete Hauptklasse:</h3>
+            <p class="prediction">{{ result.main_class }}</p>
+            <hr class="divider">
+            <div class="probabilities">
+                <h3>Top 5 Wahrscheinlichkeiten:</h3>
+                {% for class, prob in result.top_5_predictions %}
+                <p class="prob-item" data-prob="{{ prob }}">{{ class }}: {{ "%.2f"|format(prob*100) }}%</p>
+                {% endfor %}
+            </div>
+        </div>
     </div>
-    <button onclick="window.location.href='/'" class="back-btn">Zurück</button>
+    {% endfor %}
+</div>
 
+<!-- Footer with full-width disclaimer - reduced height -->
+<div class="footer">
+    <div class="footer-content">
+        <div class="disclaimer">
+            <p>Autor: Peter Scheurer</p>
+            <p>Studentische Hilfskraft Vorderasiatisches Museum Berlin</p>
+            <p>GitHub Repository:
+                <a href="https://github.com/parksidepit/CNN_Image_Classification_202503.git" target="_blank">
+                https://github.com/parksidepit/CNN_Image_Classification_202503.git</a>
+            </p>
+            <p>License: MIT License | (c) 2024 Peter Scheurer</p>
+        </div>
+    </div>
+</div>
 
+<script>
+    // Filtering by search
+    document.getElementById("searchBox").addEventListener("input", function() {
+      let filter = this.value.toLowerCase();
+      let cards = document.querySelectorAll(".result-card");
+      cards.forEach(card => {
+        let mainClass = card.querySelector(".prediction").innerText.toLowerCase();
+        // Show/hide card based on matching main class
+        card.style.display = mainClass.includes(filter) ? "inline-block" : "none";
+      });
+    });
 
-    <script>
-        document.getElementById("searchBox").addEventListener("input", function() {
-            let filter = this.value.toLowerCase();
-            let cards = document.querySelectorAll(".card");
+    // Sorting function
+    function applySorting() {
+      let sortType = document.getElementById("sortFilter").value;
+      let container = document.getElementById("resultsContainer");
+      let cards = Array.from(container.getElementsByClassName("result-card"));
 
+      cards.sort((a, b) => {
+        let aProb = parseFloat(a.querySelector(".probabilities .prob-item").getAttribute("data-prob"));
+        let bProb = parseFloat(b.querySelector(".probabilities .prob-item").getAttribute("data-prob"));
+        let aClass = a.querySelector(".prediction").innerText.toLowerCase();
+        let bClass = b.querySelector(".prediction").innerText.toLowerCase();
 
+        if (sortType === "prob-desc") return bProb - aProb;
+        if (sortType === "prob-asc") return aProb - bProb;
+        if (sortType === "alpha") return aClass.localeCompare(bClass);
+      });
 
-            cards.forEach(card => {
-                let mainClass = card.querySelector(".prediction").innerText.toLowerCase();
-                if (mainClass.includes(filter)) {
-                    card.style.display = "flex";
-                } else {
-                    card.style.display = "none";
-                }
-            });
-        });
-
-
-
-        function applySorting() {
-            let sortType = document.getElementById("sortFilter").value;
-            let container = document.getElementById("resultsContainer");
-            let cards = Array.from(container.getElementsByClassName("card"));
-
-
-
-            cards.sort((a, b) => {
-                let aProb = parseFloat(a.querySelector(".probabilities .prob-item").getAttribute("data-
-prob"));
-                let bProb = parseFloat(b.querySelector(".probabilities .prob-item").getAttribute("data-
-prob"));
-                let aClass = a.querySelector(".prediction").innerText.toLowerCase();
-                let bClass = b.querySelector(".prediction").innerText.toLowerCase();
-
-
-
-                if (sortType === "prob-desc") return bProb - aProb;
-                if (sortType === "prob-asc") return aProb - bProb;
-
-
-                if (sortType === "alpha") return aClass.localeCompare(bClass);
-            });
-
-
-
-            container.innerHTML = "";
-            cards.forEach(card => container.appendChild(card));
-        }
-    </script>
+      // Re-inject sorted cards in new order
+      container.innerHTML = "";
+      cards.forEach(card => {
+        card.style.display = "inline-block"; // ensure it's visible
+        container.appendChild(card);
+      });
+    }
+</script>
 </body>
 </html>
