@@ -74,7 +74,7 @@ def process_excel_and_rename_images():
     source_folder = os.path.join(project_root, source_rel_folder)
     processed_folder = os.path.join(project_root, processed_rel_folder)
 
-    # Read the Excel file and remove extraneous spaces from string values
+    # Read the Excel file and remove extra space from string values
     df = pd.read_excel(excel_path, dtype=str, header=None)
     df = df.applymap(lambda x: x.replace(" ", "") if isinstance(x, str) else x)
 
@@ -156,7 +156,6 @@ def augment_images(class_dir, target_count, augmentation):
         new_filename = f"aug_{current_count}.jpg"
         new_full_path = os.path.join(class_dir, new_filename)
         aug_img.save(new_full_path)
-        # Append the full path to the list so that future iterations use it
         images.append(new_full_path)
         current_count += 1
 
@@ -225,7 +224,7 @@ def sort_and_split_images():
     test_split = 0.15
     min_samples = 10
 
-    # Create an ImageDataGenerator for augmentation (for both processed and split folders)
+    # Create an ImageDataGenerator for augmentation
     augmentation = ImageDataGenerator(
         rotation_range=30,
         width_shift_range=0.2,
@@ -267,7 +266,7 @@ def sort_and_split_images():
         os.makedirs(os.path.join(val_dir, class_name), exist_ok=True)
         os.makedirs(os.path.join(test_dir, class_name), exist_ok=True)
 
-        # Copy images to the respective directories
+        # Copy images to the right directories
         for img_path in train_images:
             shutil.copy(img_path, os.path.join(train_dir, class_name, os.path.basename(img_path)))
         for img_path in val_images:

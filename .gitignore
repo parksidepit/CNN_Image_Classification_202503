@@ -19,13 +19,13 @@ data/
 rti_results_export_neu
 
 
-# Models folder: Do not ignore, so models will be tracked by Git.
+
 # models/
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
-# PyCharm project files (optional - if you want to ignore your IDE settings)
+# PyCharm project files
 .idea/
 
 # Documentation Folders

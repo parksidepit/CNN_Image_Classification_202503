@@ -37,7 +37,7 @@ def load_config():
 
 app = Flask(__name__)
 
-# Route to serve files from the data folder (background image, etc.)
+# Route to serve files from the data folder
 project_root = get_project_root()
 @app.route('/data/<path:filename>')
 def data_files(filename):
@@ -66,7 +66,7 @@ model_path = os.path.join(
 )
 model = load_model(model_path)
 
-# Class labels (29) in the order from your PDF
+# Class labels (29)
 CLASS_LABELS = {
     0: 'SOC1', 1: 'SOC11', 2: 'SOC12', 3: 'SOC13', 4: 'SOC15',
     5: 'SOC17', 6: 'SOC19', 7: 'SOC2', 8: 'SOC20', 9: 'SOC21',

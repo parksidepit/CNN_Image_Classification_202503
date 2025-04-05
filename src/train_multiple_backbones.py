@@ -17,7 +17,7 @@ Dependencies:
   - pyyaml
   - etc.
 
-Make sure your config.yaml contains something like:
+Make sure config.yaml contains something like:
 
 training:
   data_dir: "data/splits"       # or wherever your train/val/test are located
@@ -118,21 +118,21 @@ def main():
         if not os.path.isdir(d):
             raise FileNotFoundError(f"Directory not found: {d}")
 
-    # We'll define a function that uses hyperopt to evaluate a single param set
+    # define a function that uses hyperopt to evaluate a single param set
     from hyperopt import fmin, tpe, hp, Trials, STATUS_OK
 
-    # We'll define a search space for learning_rate, dropout, dense_units
+    # define a search space for learning_rate, dropout, dense_units
     search_space = {
         'learning_rate': hp.loguniform('learning_rate', -5, -2),  # ~ 1e-5 to 1e-2
         'dropout': hp.uniform('dropout', 0.3, 0.7),
         'dense_units': hp.choice('dense_units', [128, 256, 512])
     }
 
-    # We'll loop over multiple backbones
+    # loop over multiple backbones
     backbones = ['VGG16', 'ResNet50', 'EfficientNetB0']
     results = {}
 
-    # Let's define a helper function for the objective
+    # define a helper function for the objective
     def objective(params, backbone, train_gen, val_gen):
         try:
             model = create_model(
@@ -163,7 +163,7 @@ def main():
             print(f"Error in objective: {e}")
             return {'loss': float('inf'), 'status': STATUS_OK}
 
-    # For each backbone, we'll do a hyperopt search, then train a final model with best params
+    # For each backbone do a hyperopt search, then train a final model with best params
     for backbone in backbones:
         print(f"\n=== Training with {backbone} ===")
         # Preprocessing function
@@ -224,10 +224,10 @@ def main():
         )
         print(f"Best hyperparams for {backbone}: {best}")
 
-        # Now let's train final model with best params
+        # train final model with best params
         final_lr = best['learning_rate']
         final_dropout = best['dropout']
-        # best['dense_units'] is an index in [0,1,2], so we map it
+        # best['dense_units'] is index in [0,1,2]
         dense_list = [128, 256, 512]
         final_dense_units = dense_list[best['dense_units']]
 

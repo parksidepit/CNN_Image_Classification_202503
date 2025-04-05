@@ -63,11 +63,11 @@ def evaluate_model():
     test_rel_dir = config['data']['splits'].get('test', 'data/splits/test')
     test_dir = os.path.join(project_root, test_rel_dir)
 
-    # Model path (from training section; defaults to models/optimized_efficientnet.keras)
+    # Model path
     model_output_dir = config['training'].get('output_dir', 'models')
     model_path = os.path.join(project_root, model_output_dir, "optimized_efficientnet.keras")
 
-    # Evaluation output directory: either from config or default to "reports"
+    # Evaluation output directory
     if 'evaluation' in config and 'output_dir' in config['evaluation']:
         eval_output_dir = os.path.join(project_root, config['evaluation']['output_dir'])
     else:

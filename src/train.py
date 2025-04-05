@@ -63,12 +63,12 @@ def build_model(input_shape, num_classes, dropout_rate, dense_units, learning_ra
     Returns:
         A compiled Keras model.
     """
-    # Ensure learning_rate is a float
+    # learning_rate is float
     learning_rate = float(learning_rate)
 
     base_model = EfficientNetB0(weights='imagenet', include_top=False, input_shape=input_shape)
 
-    # Freeze the first 70 layers and unfreeze the rest
+    # Freeze first 70 layers and unfreeze the rest
     for layer in base_model.layers[:70]:
         layer.trainable = False
     for layer in base_model.layers[70:]:
@@ -171,7 +171,7 @@ def train_model():
     checkpoint_callback = ModelCheckpoint(model_path, monitor='val_loss', save_best_only=True, verbose=1)
     early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
 
-    # Train the model
+    # Train model
     history = model.fit(
         train_generator,
         steps_per_epoch=train_generator.samples // batch_size,
@@ -181,7 +181,7 @@ def train_model():
         callbacks=[early_stopping, checkpoint_callback]
     )
 
-    # Evaluate the model on the test set
+    # Evaluate model on the test set
     test_loss, test_acc = model.evaluate(test_generator)
     print(f"Test Accuracy: {test_acc * 100:.2f}%")
 
